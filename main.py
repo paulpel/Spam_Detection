@@ -1,34 +1,58 @@
-import subprocess
 import argparse
+from data_process_and_train import DataPreprocessor, ModelTrainer, ResultsVisualizer
+from bert_features import process_and_extract_features
 
-def run_bert_feature_extraction(data_path, output_path):
-    """
-    Runs the BERT feature extraction script.
-    """
-    subprocess.run(['python', 'bert_feature_s.py', '--input', data_path, '--output', output_path])
+def main(original_data_path, output_folder):
+    # Step 1: Train classifiers on original CSV data
+    print("Training initial classifiers on the original data...")
+    original_data_preprocessor = DataPreprocessor(original_data_path, is_bert=False)
+    original_data = original_data_preprocessor.preprocess()
+    original_model_trainer = ModelTrainer(original_data, is_bert=False)
+    original_model_trainer.train_and_evaluate()
+    original_results_visualizer = ResultsVisualizer(original_model_trainer.get_results())
+    original_results_visualizer.display_results()
 
-def run_model_training(data_path, is_bert):
-    """
-    Runs the model training script.
-    """
-    bert_flag = '--bert' if is_bert else ''
-    subprocess.run(['python', 'train.py', data_path, bert_flag])
+    # Step 2: Generate concept drift data (Placeholder)
+    print("Generating concept drift data...")
+    # drift_data_path = generate_concept_drift_data(original_data_path) # Implement this function
+    # TO DO (niech zmienna sie nazywa jak ponizej)
+    drift_data_path = "path_to_drifted_data.csv"  # Placeholder path
 
-def main():
-    parser = argparse.ArgumentParser(description='Run BERT feature extraction and model training')
-    parser.add_argument('data_path', type=str, help='Path to the original dataset')
-    parser.add_argument('--use_bert', action='store_true', help='Flag to use BERT for feature extraction')
-    args = parser.parse_args()
+    # Step 3: Retrain classifiers on the drifted data
+    print("Retraining classifiers on the drifted data...")
+    drift_data_preprocessor = DataPreprocessor(drift_data_path, is_bert=False)
+    drift_data = drift_data_preprocessor.preprocess()
+    drift_model_trainer = ModelTrainer(drift_data, is_bert=False)
+    drift_model_trainer.train_and_evaluate()
+    drift_results_visualizer = ResultsVisualizer(drift_model_trainer.get_results())
+    drift_results_visualizer.display_results()
 
-    if args.use_bert:
-        # Specify the output path for BERT features
-        output_path = args.data_path.replace('.csv', '_bert_features.csv')
-        run_bert_feature_extraction(args.data_path, output_path)
-        # Use the generated BERT features for model training
-        run_model_training(output_path, is_bert=True)
-    else:
-        # Directly use the original data for model training
-        run_model_training(args.data_path, is_bert=False)
+    # Step 4: Extract BERT features from both original and drifted data
+    print("Extracting BERT features...")
+    bert_features_original_path = f"{output_folder}/bert_encoded_features_original.csv"
+    process_and_extract_features(original_data_path, bert_features_original_path)
+    bert_features_drift_path = f"{output_folder}/bert_encoded_features_drift.csv"
+    process_and_extract_features(drift_data_path, bert_features_drift_path)
+
+    # Step 5: Train classifiers on BERT features and visualize results
+    print("Training classifiers on BERT features and visualizing results...")
+    bert_original_data_preprocessor = DataPreprocessor(bert_features_original_path, is_bert=True)
+    bert_original_data = bert_original_data_preprocessor.preprocess()
+    bert_original_model_trainer = ModelTrainer(bert_original_data, is_bert=True)
+    bert_original_model_trainer.train_and_evaluate()
+    bert_original_results_visualizer = ResultsVisualizer(bert_original_model_trainer.get_results())
+    bert_original_results_visualizer.display_results()
+
+    bert_drift_data_preprocessor = DataPreprocessor(bert_features_drift_path, is_bert=True)
+    bert_drift_data = bert_drift_data_preprocessor.preprocess()
+    bert_drift_model_trainer = ModelTrainer(bert_drift_data, is_bert=True)
+    bert_drift_model_trainer.train_and_evaluate()
+    bert_drift_results_visualizer = ResultsVisualizer(bert_drift_model_trainer.get_results())
+    bert_drift_results_visualizer.display_results()
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(description="Main training and evaluation loop for research on concept drift.")
+    parser.add_argument("original_data_path", type=str, help="Path to the original dataset CSV file.")
+    parser.add_argument("output_folder", type=str, help="Folder where output files will be stored.")
+    args = parser.parse_args()
+    main(args.original_data_path, args.output_folder)

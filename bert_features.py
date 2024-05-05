@@ -71,19 +71,22 @@ def extract_features(data_loader, model, device):
     return np.concatenate(features)
 
 
-# Main function to process and extract features
-def main():
+# Function to process and extract features that can be imported and reused
+def process_and_extract_features(data_filepath, output_filepath):
     config = Config()
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     tokenizer = BertTokenizer.from_pretrained(config.BERT_MODEL)
     model = BertModel.from_pretrained(config.BERT_MODEL)
     model.to(device)
 
-    data = load_data("/mnt/data/enron_spam_data.csv")
-    data_loader = create_data_loader(data, tokenizer, config.MAX_LEN, config.BATCH_SIZE)
+    data = load_data(data_filepath)
+    data_loader = create_data_loader(data, tokenizer, config.MAX_LEN, config.BERT_SIZE)
     features = extract_features(data_loader, model, device)
 
     # Combine features with labels and save
     features_df = pd.DataFrame(features)
     features_df["label"] = data["Spam/Ham"].values
-    features_df.to_csv("/mnt/data/bert_encoded_features.csv", index=False)
+    features_df.to_csv(output_filepath, index=False)
+
+
+# process_and_extract_features("/path/to/input.csv", "/path/to/output.csv")
