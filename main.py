@@ -13,7 +13,7 @@ def main(original_data_path, output_folder):
     original_results_visualizer = ResultsVisualizer(original_model_trainer.get_results())
     original_results_visualizer.display_results()
 
-    # Step 2: Generate concept drift data (Placeholder)
+    # Step 2: Generate concept drift data 
     print("Generating concept drift data...")
     drift_data_path = prepare_mix_dataset(output_folder)
 
