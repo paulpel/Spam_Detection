@@ -6,14 +6,12 @@ import numpy as np
 from sklearn.preprocessing import LabelEncoder
 
 
-# Configuration for BERT processing
 class Config:
     MAX_LEN = 128
     BATCH_SIZE = 16
     BERT_MODEL = "bert-base-uncased"
 
 
-# Custom dataset for loading text
 class TextDataset(Dataset):
     def __init__(self, messages, tokenizer, max_len):
         self.messages = messages
@@ -40,7 +38,6 @@ class TextDataset(Dataset):
         }
 
 
-# Load data
 def load_data(filepath):
     data = pd.read_csv(filepath)
     data["Messages"] = data["Subject"].fillna("") + " " + data["Message"].fillna("")
@@ -50,7 +47,6 @@ def load_data(filepath):
     return data
 
 
-# Create data loader for processing
 def create_data_loader(df, tokenizer, max_len, batch_size):
     ds = TextDataset(
         messages=df.Messages.to_numpy(), tokenizer=tokenizer, max_len=max_len
@@ -58,7 +54,6 @@ def create_data_loader(df, tokenizer, max_len, batch_size):
     return DataLoader(ds, batch_size=batch_size, num_workers=4)
 
 
-# Feature extraction function
 def extract_features(data_loader, model, device):
     model = model.eval()
     features = []
@@ -71,7 +66,6 @@ def extract_features(data_loader, model, device):
     return np.concatenate(features)
 
 
-# Function to process and extract features that can be imported and reused
 def process_and_extract_features(data_filepath, output_filepath):
     config = Config()
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -83,10 +77,7 @@ def process_and_extract_features(data_filepath, output_filepath):
     data_loader = create_data_loader(data, tokenizer, config.MAX_LEN, config.BERT_SIZE)
     features = extract_features(data_loader, model, device)
 
-    # Combine features with labels and save
     features_df = pd.DataFrame(features)
     features_df["label"] = data["Spam/Ham"].values
     features_df.to_csv(output_filepath, index=False)
 
-
-# process_and_extract_features("/path/to/input.csv", "/path/to/output.csv")

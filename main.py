@@ -1,6 +1,7 @@
 import argparse
 from data_process_and_train import DataPreprocessor, ModelTrainer, ResultsVisualizer
 from bert_features import process_and_extract_features
+from create_concept_driftprepare_mix_dataset,  prepare_mix_dataset
 
 def main(original_data_path, output_folder):
     # Step 1: Train classifiers on original CSV data
@@ -14,9 +15,7 @@ def main(original_data_path, output_folder):
 
     # Step 2: Generate concept drift data (Placeholder)
     print("Generating concept drift data...")
-    # drift_data_path = generate_concept_drift_data(original_data_path) # Implement this function
-    # TO DO (niech zmienna sie nazywa jak ponizej)
-    drift_data_path = "path_to_drifted_data.csv"  # Placeholder path
+    drift_data_path = prepare_mix_dataset(output_folder)
 
     # Step 3: Retrain classifiers on the drifted data
     print("Retraining classifiers on the drifted data...")
@@ -56,3 +55,4 @@ if __name__ == "__main__":
     parser.add_argument("output_folder", type=str, help="Folder where output files will be stored.")
     args = parser.parse_args()
     main(args.original_data_path, args.output_folder)
+

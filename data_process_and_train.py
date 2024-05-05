@@ -34,7 +34,6 @@ class DataPreprocessor:
                 self.data["Spam/Ham"]
             )
         else:
-            # If BERT features are used, we expect the data to have two columns: features and labels
             self.data.rename(columns={"label": "Spam/Ham"}, inplace=True)
         return self.data
 
@@ -115,3 +114,4 @@ def main(filepath, is_bert):
     model_trainer.train_and_evaluate()
     results_visualizer = ResultsVisualizer(model_trainer.get_results())
     results_visualizer.display_results()
+
