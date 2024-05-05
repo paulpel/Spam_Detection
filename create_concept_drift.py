@@ -32,7 +32,7 @@ def prepare_mix_dataset(output_folder):
     data2 = pd.read_csv("enron_spam_data_2.csv")
 
     data1_preprocessed = tokenize_dataset_enron(data1)
-    data2_preprocessed = tokenize_dataset_enron(data2)  # Assuming same preprocessing for simplicity
+    data2_preprocessed = tokenize_dataset_enron(data2)
 
     blend_ratio = 0.3
     mixed_dataset = mix_datasets(data1_preprocessed, data2_preprocessed, blend_ratio)
