@@ -87,7 +87,3 @@ def main():
     features_df = pd.DataFrame(features)
     features_df["label"] = data["Spam/Ham"].values
     features_df.to_csv("/mnt/data/bert_encoded_features.csv", index=False)
-
-
-if __name__ == "__main__":
-    main()

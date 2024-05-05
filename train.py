@@ -115,17 +115,3 @@ def main(filepath, is_bert):
     model_trainer.train_and_evaluate()
     results_visualizer = ResultsVisualizer(model_trainer.get_results())
     results_visualizer.display_results()
-
-
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(
-        description="Train models on text or BERT features"
-    )
-    parser.add_argument("filepath", type=str, help="Path to the dataset")
-    parser.add_argument(
-        "--bert",
-        action="store_true",
-        help="Indicates if the input file is BERT processed features",
-    )
-    args = parser.parse_args()
-    main(args.filepath, args.bert)
