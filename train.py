@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import argparse
 from sklearn.model_selection import train_test_split, RepeatedKFold, cross_val_score
 from sklearn.preprocessing import LabelEncoder, TfidfVectorizer
 from sklearn.naive_bayes import MultinomialNB
@@ -11,28 +12,38 @@ import seaborn as sns
 
 
 class DataPreprocessor:
-    def __init__(self, filepath):
+    def __init__(self, filepath, is_bert=False):
         self.data = pd.read_csv(filepath)
-        self.label_encoder = LabelEncoder()
+        self.is_bert = is_bert
+        self.label_encoder = LabelEncoder() if not is_bert else None
 
     def preprocess(self):
-        self.data["Messages"] = (
-            self.data["Subject"].fillna("") + " " + self.data["Message"].fillna("")
-        )
-        self.data.drop(columns=["Message", "Message ID"], inplace=True)
-        self.data["Messages"] = (
-            self.data["Messages"]
-            .str.lower()
-            .replace([":", ",", ".", "-"], " ", regex=True)
-        )
-        self.data["Spam/Ham"] = self.label_encoder.fit_transform(self.data["Spam/Ham"])
+        if not self.is_bert:
+            self.data["Messages"] = (
+                self.data["Subject"].fillna("") + " " + self.data["Message"].fillna("")
+            )
+            self.data.drop(
+                columns=["Subject", "Message", "Message ID", "Date"], inplace=True
+            )
+            self.data["Messages"] = (
+                self.data["Messages"]
+                .str.lower()
+                .replace([":", ",", ".", "-"], " ", regex=True)
+            )
+            self.data["Spam/Ham"] = self.label_encoder.fit_transform(
+                self.data["Spam/Ham"]
+            )
+        else:
+            # If BERT features are used, we expect the data to have two columns: features and labels
+            self.data.rename(columns={"label": "Spam/Ham"}, inplace=True)
         return self.data
 
 
 class ModelTrainer:
-    def __init__(self, data):
+    def __init__(self, data, is_bert=False):
         self.data = data
-        self.vectorizer = TfidfVectorizer()
+        self.is_bert = is_bert
+        self.vectorizer = None if is_bert else TfidfVectorizer()
         self.models = {
             "Naive Bayes": MultinomialNB(),
             "KNN": KNeighborsClassifier(),
@@ -42,11 +53,18 @@ class ModelTrainer:
         self.results = {}
 
     def train_and_evaluate(self):
-        X_train, X_test, y_train, y_test = train_test_split(
-            self.data["Messages"], self.data["Spam/Ham"], test_size=0.5
-        )
-        count_train = self.vectorizer.fit_transform(X_train)
-        count_test = self.vectorizer.transform(X_test)
+        if not self.is_bert:
+            X_train, X_test, y_train, y_test = train_test_split(
+                self.data["Messages"], self.data["Spam/Ham"], test_size=0.5
+            )
+            count_train = self.vectorizer.fit_transform(X_train)
+            count_test = self.vectorizer.transform(X_test)
+        else:
+            X_train, X_test, y_train, y_test = train_test_split(
+                self.data.drop("Spam/Ham", axis=1), self.data["Spam/Ham"], test_size=0.5
+            )
+            count_train = X_train
+            count_test = X_test
 
         rkf = RepeatedKFold(n_splits=10, n_repeats=5, random_state=2652124)
         for name, model in self.models.items():
@@ -90,9 +108,24 @@ class ResultsVisualizer:
             )
 
 
-data_preprocessor = DataPreprocessor("enron_spam_data.csv")
-data = data_preprocessor.preprocess()
-model_trainer = ModelTrainer(data)
-model_trainer.train_and_evaluate()
-results_visualizer = ResultsVisualizer(model_trainer.get_results())
-results_visualizer.display_results()
+def main(filepath, is_bert):
+    data_preprocessor = DataPreprocessor(filepath, is_bert)
+    data = data_preprocessor.preprocess()
+    model_trainer = ModelTrainer(data, is_bert)
+    model_trainer.train_and_evaluate()
+    results_visualizer = ResultsVisualizer(model_trainer.get_results())
+    results_visualizer.display_results()
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(
+        description="Train models on text or BERT features"
+    )
+    parser.add_argument("filepath", type=str, help="Path to the dataset")
+    parser.add_argument(
+        "--bert",
+        action="store_true",
+        help="Indicates if the input file is BERT processed features",
+    )
+    args = parser.parse_args()
+    main(args.filepath, args.bert)
