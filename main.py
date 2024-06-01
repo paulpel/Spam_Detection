@@ -1,58 +1,59 @@
 import argparse
-from data_process_and_train import DataPreprocessor, ModelTrainer, ResultsVisualizer
+import os
+import pandas as pd
+import numpy as np
+
+from data_process_and_train import train_classifiers, evaluate_models, extract_features_with_bert, \
+    train_classifiers_with_bert_features, bert_evaluate_models
 from bert_features import process_and_extract_features
-from create_concept_driftprepare_mix_dataset,  prepare_mix_dataset
+from create_concept_drift import prepare_data, bert_prepare_data
 
-def main(original_data_path, output_folder):
-    # Step 1: Train classifiers on original CSV data
-    print("Training initial classifiers on the original data...")
-    original_data_preprocessor = DataPreprocessor(original_data_path, is_bert=False)
-    original_data = original_data_preprocessor.preprocess()
-    original_model_trainer = ModelTrainer(original_data, is_bert=False)
-    original_model_trainer.train_and_evaluate()
-    original_results_visualizer = ResultsVisualizer(original_model_trainer.get_results())
-    original_results_visualizer.display_results()
+def main(original_data_path, drifted_data_path, output_folder):
+    if os.path.exists('enron_spam_data.pkl') and os.path.exists('processed_data.pkl'):
+        regular_df = pd.read_pickle('enron_spam_data.pkl')
+        drifted_df = pd.read_pickle('processed_data.pkl')
+    else:
+        regular_df, drifted_df = prepare_data(original_data_path, drifted_data_path)
 
-    # Step 2: Generate concept drift data 
-    print("Generating concept drift data...")
-    drift_data_path = prepare_mix_dataset(output_folder)
+    if os.path.exists('bert_enron_spam_data.pkl') and os.path.exists('bert_processed_data.pkl'):
+        bert_regular_df = pd.read_pickle('bert_enron_spam_data.pkl')
+        bert_drifted_df = pd.read_pickle('bert_processed_data.pkl')
+    else:
+        bert_regular_df, bert_drifted_df = bert_prepare_data(original_data_path, drifted_data_path)
+    
+    # Swap the order of the dataframes to better match test data length (might be temporary)  
+    regular_df, drifted_df = drifted_df, regular_df
+    bert_regular_df, bert_drifted_df = bert_drifted_df, bert_regular_df
 
-    # Step 3: Retrain classifiers on the drifted data
-    print("Retraining classifiers on the drifted data...")
-    drift_data_preprocessor = DataPreprocessor(drift_data_path, is_bert=False)
-    drift_data = drift_data_preprocessor.preprocess()
-    drift_model_trainer = ModelTrainer(drift_data, is_bert=False)
-    drift_model_trainer.train_and_evaluate()
-    drift_results_visualizer = ResultsVisualizer(drift_model_trainer.get_results())
-    drift_results_visualizer.display_results()
+    # Step 1: Train classifiers on regular CSV data
+    print("Training initial classifiers on regular data...")
+    trained_models, scores, vectorizer = train_classifiers(regular_df)
 
-    # Step 4: Extract BERT features from both original and drifted data
-    print("Extracting BERT features...")
-    bert_features_original_path = f"{output_folder}/bert_encoded_features_original.csv"
-    process_and_extract_features(original_data_path, bert_features_original_path)
-    bert_features_drift_path = f"{output_folder}/bert_encoded_features_drift.csv"
-    process_and_extract_features(drift_data_path, bert_features_drift_path)
+    # Step 2: Evaluate classifiers on drifted CSV data
+    print("Evaluating classifiers on drifted data...")
+    drifted_scores = evaluate_models(trained_models, vectorizer, drifted_df)
 
-    # Step 5: Train classifiers on BERT features and visualize results
-    print("Training classifiers on BERT features and visualizing results...")
-    bert_original_data_preprocessor = DataPreprocessor(bert_features_original_path, is_bert=True)
-    bert_original_data = bert_original_data_preprocessor.preprocess()
-    bert_original_model_trainer = ModelTrainer(bert_original_data, is_bert=True)
-    bert_original_model_trainer.train_and_evaluate()
-    bert_original_results_visualizer = ResultsVisualizer(bert_original_model_trainer.get_results())
-    bert_original_results_visualizer.display_results()
+    # Step 3: Extract features with BERT
+    print("Extracting features with BERT...")
+    regular_features, drifted_features = None, None
+    if os.path.exists('bert_encoded_features_original.csv') and os.path.exists('bert_encoded_features_drifted.csv'):
+        regular_features = np.loadtxt('bert_encoded_features_original.csv', delimiter=',')
+        drifted_features = np.loadtxt('bert_encoded_features_drifted.csv', delimiter=',')
+    else:
+        regular_features = extract_features_with_bert(bert_regular_df)
+        drifted_features = extract_features_with_bert(bert_drifted_df)
+        np.savetxt("bert_encoded_features_original.csv", regular_features, delimiter=",")
+        np.savetxt("bert_encoded_features_drifted.csv", drifted_features, delimiter=",")
 
-    bert_drift_data_preprocessor = DataPreprocessor(bert_features_drift_path, is_bert=True)
-    bert_drift_data = bert_drift_data_preprocessor.preprocess()
-    bert_drift_model_trainer = ModelTrainer(bert_drift_data, is_bert=True)
-    bert_drift_model_trainer.train_and_evaluate()
-    bert_drift_results_visualizer = ResultsVisualizer(bert_drift_model_trainer.get_results())
-    bert_drift_results_visualizer.display_results()
+    # Step 4: Train classifiers on BERT features
+    print("Training classifiers on BERT features on regular data...")
+    bert_trained_models, bert_scores = train_classifiers_with_bert_features(regular_df, regular_features)
+
+    # Step 5: Evaluate classifiers on BERT features
+    print("Evaluating classifiers on BERT features on drifted data...")
+    bert_drifted_scores = bert_evaluate_models(bert_trained_models, drifted_features, drifted_df)
+
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Main training and evaluation loop for research on concept drift.")
-    parser.add_argument("original_data_path", type=str, help="Path to the original dataset CSV file.")
-    parser.add_argument("output_folder", type=str, help="Folder where output files will be stored.")
-    args = parser.parse_args()
-    main(args.original_data_path, args.output_folder)
+    main("enron_spam_data.csv", "processed_data.csv", "/")
 
