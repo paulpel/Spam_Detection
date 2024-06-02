@@ -57,12 +57,12 @@ This script orchestrates the entire process of loading data, training classifier
 
 ### Classifier Training and Evaluation
 
-**File:** `data_process_and_train.py`
+**File:** `train_evaluate.py`
 
 This script contains functions for training classifiers on the provided datasets and evaluating their performance.
 
 **Functions:**
-- `train_classifiers(data)`: Trains Naive Bayes classifiers on the given dataset.
+- `train_classifiers(data)`: Trains classifiers on the given dataset.
 - `evaluate_models(trained_models, vectorizer, data)`: Evaluates the trained classifiers on a new dataset.
 - `extract_features_with_bert(data, model_name, max_length, batch_size)`: Extracts features from text data using a pre-trained BERT model.
 - `train_classifiers_with_bert_features(data, features)`: Trains classifiers on BERT-extracted features.
@@ -70,7 +70,7 @@ This script contains functions for training classifiers on the provided datasets
 
 ### Data Preprocessing
 
-**File:** `create_concept_drift.py`
+**File:** `preprocess_data.py`
 
 This script contains functions for preprocessing and tokenizing the data for both regular and BERT-based feature extraction.
 
