@@ -10,6 +10,17 @@ nltk.download("wordnet")
 
 
 def tokenize_dataset_enron(data):
+    """
+    Tokenize and preprocess the Enron dataset.
+
+    This function concatenates the 'Subject' and 'Message' columns, converts the text to lowercase,
+    removes punctuation, tokenizes the text, and removes stopwords.
+
+    :param data: The dataset containing 'Subject' and 'Message' columns.
+    :type data: pandas.DataFrame
+    :return: The tokenized and preprocessed dataset.
+    :rtype: pandas.DataFrame
+    """
     data["message"] = data["Subject"].fillna("") + " " + data["Message"].fillna("")
     data["message"] = data["message"].str.lower()
     data["message"] = data["message"].apply(
@@ -24,6 +35,17 @@ def tokenize_dataset_enron(data):
 
 
 def tokenize_dataset_processed(data):
+    """
+    Tokenize and preprocess the processed dataset.
+
+    This function concatenates the 'subject' and 'message' columns, converts the text to lowercase,
+    removes punctuation, tokenizes the text, and removes stopwords.
+
+    :param data: The dataset containing 'subject' and 'message' columns.
+    :type data: pandas.DataFrame
+    :return: The tokenized and preprocessed dataset.
+    :rtype: pandas.DataFrame
+    """
     data["message"] = data["subject"].fillna("") + " " + data["message"].fillna("")
     data["message"] = data["message"].str.lower()
     data["message"] = data["message"].apply(
@@ -38,6 +60,17 @@ def tokenize_dataset_processed(data):
 
 
 def bert_tokenize_dataset_enron(data):
+    """
+    Tokenize and preprocess the Enron dataset for BERT.
+
+    This function concatenates the 'Subject' and 'Message' columns, converts the text to lowercase,
+    and removes punctuation.
+
+    :param data: The dataset containing 'Subject' and 'Message' columns.
+    :type data: pandas.DataFrame
+    :return: The tokenized and preprocessed dataset.
+    :rtype: pandas.DataFrame
+    """
     data["message"] = data["Subject"].fillna("") + " " + data["Message"].fillna("")
     data["message"] = data["message"].str.lower()
     data["message"] = data["message"].apply(
@@ -47,6 +80,17 @@ def bert_tokenize_dataset_enron(data):
 
 
 def bert_tokenize_dataset_processed(data):
+    """
+    Tokenize and preprocess the processed dataset for BERT.
+
+    This function concatenates the 'subject' and 'message' columns, converts the text to lowercase,
+    and removes punctuation.
+
+    :param data: The dataset containing 'subject' and 'message' columns.
+    :type data: pandas.DataFrame
+    :return: The tokenized and preprocessed dataset.
+    :rtype: pandas.DataFrame
+    """
     data["message"] = data["subject"].fillna("") + " " + data["message"].fillna("")
     data["message"] = data["message"].str.lower()
     data["message"] = data["message"].apply(
@@ -56,6 +100,19 @@ def bert_tokenize_dataset_processed(data):
 
 
 def prepare_data(data_path, drift_data_path):
+    """
+    Prepare the Enron and processed datasets for training and evaluation.
+
+    This function reads the datasets from the provided paths, tokenizes and preprocesses them,
+    and saves the preprocessed datasets as pickle files.
+
+    :param data_path: Path to the Enron data CSV file.
+    :type data_path: str
+    :param drift_data_path: Path to the processed data CSV file.
+    :type drift_data_path: str
+    :return: A tuple containing the preprocessed Enron and processed datasets.
+    :rtype: tuple(pandas.DataFrame, pandas.DataFrame)
+    """
     df = pd.read_csv(data_path)
     df = tokenize_dataset_enron(df)
     df["Spam/Ham"] = df["Spam/Ham"].apply(lambda x: 1 if x == "spam" else 0)
@@ -75,6 +132,19 @@ def prepare_data(data_path, drift_data_path):
 
 
 def bert_prepare_data(data_path, drift_data_path):
+    """
+    Prepare the Enron and processed datasets for BERT-based feature extraction.
+
+    This function reads the datasets from the provided paths, tokenizes and preprocesses them,
+    and saves the preprocessed datasets as pickle files.
+
+    :param data_path: Path to the Enron data CSV file.
+    :type data_path: str
+    :param drift_data_path: Path to the processed data CSV file.
+    :type drift_data_path: str
+    :return: A tuple containing the preprocessed Enron and processed datasets for BERT.
+    :rtype: tuple(pandas.DataFrame, pandas.DataFrame)
+    """
     df = pd.read_csv(data_path)
     df = bert_tokenize_dataset_enron(df)
     df["Spam/Ham"] = df["Spam/Ham"].apply(lambda x: 1 if x == "spam" else 0)
