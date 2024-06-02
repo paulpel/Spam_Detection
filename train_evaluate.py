@@ -5,7 +5,7 @@ from tqdm import tqdm
 
 from sklearn.model_selection import train_test_split
 from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.naive_bayes import GaussianNB
+from sklearn.naive_bayes import GaussianNB, MultinomialNB
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
 from sklearn.metrics import accuracy_score, classification_report
@@ -40,10 +40,10 @@ def train_classifiers(data):
 
     # Initialize the classifiers
     classifiers = {
-        "Naive Bayes": GaussianNB(),
-        # "KNN": KNeighborsClassifier(),
-        # "Random Forest": RandomForestClassifier(),
-        # "Gradient Boosting": GradientBoostingClassifier(),
+        "Naive Bayes": MultinomialNB(),
+        "KNN": KNeighborsClassifier(),
+        "Random Forest": RandomForestClassifier(),
+        "Gradient Boosting": GradientBoostingClassifier(),
     }
 
     trained_models = {}
@@ -51,12 +51,8 @@ def train_classifiers(data):
 
     # Train each classifier and evaluate
     for name, clf in classifiers.items():
-        if name == "Naive Bayes":
-            clf.fit(X_train_vec.toarray(), y_train)
-            y_pred = clf.predict(X_test_vec.toarray())
-        else:
-            clf.fit(X_train_vec, y_train)
-            y_pred = clf.predict(X_test_vec)
+        clf.fit(X_train_vec, y_train)
+        y_pred = clf.predict(X_test_vec)
         acc = accuracy_score(y_test, y_pred)
         report = classification_report(y_test, y_pred)
         trained_models[name] = clf
@@ -190,10 +186,10 @@ def train_classifiers_with_bert_features(data, features):
 
     # Initialize the classifiers
     classifiers = {
-        "Naive Bayes": GaussianNB(),
-        # "KNN": KNeighborsClassifier(),
-        # "Random Forest": RandomForestClassifier(),
-        # "Gradient Boosting": GradientBoostingClassifier(),
+        "Naive Bayes": MultinomialNB(),
+        "KNN": KNeighborsClassifier(),
+        "Random Forest": RandomForestClassifier(),
+        "Gradient Boosting": GradientBoostingClassifier(),
     }
 
     trained_models = {}

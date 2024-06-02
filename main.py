@@ -81,6 +81,12 @@ def main(original_data_path, drifted_data_path, output_folder):
             "bert_encoded_features_original.csv", regular_features, delimiter=","
         )
         np.savetxt("bert_encoded_features_drifted.csv", drifted_features, delimiter=",")
+    
+    # Add 10 to every value in the features to avoid negative values
+    regular_features += 10
+    drifted_features += 10
+    # print(regular_features, drifted_features)
+    print(np.min(regular_features), np.min(drifted_features))
 
     # Step 4: Train classifiers on BERT features
     print("Training classifiers on BERT features on regular data...")
@@ -117,4 +123,4 @@ def main(original_data_path, drifted_data_path, output_folder):
 
 
 if __name__ == "__main__":
-    main("enron_spam_data.csv", "processed_data.csv", "/")
+    main("enron_spam_data.csv", "processed_data.csv", "")
