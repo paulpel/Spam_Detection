@@ -10,6 +10,7 @@ from train_evaluate import (
     bert_evaluate_models,
 )
 from preprocess_data import prepare_data, bert_prepare_data
+from statistical_tests import compare_classifiers
 
 
 def main(original_data_path, drifted_data_path, output_folder):
@@ -92,6 +93,27 @@ def main(original_data_path, drifted_data_path, output_folder):
     bert_drifted_scores = bert_evaluate_models(
         bert_trained_models, drifted_features, drifted_df
     )
+
+    # Step 6: Performe statistical tests on scores for different data
+    # Compare Normal vs Drifted Data Scores
+    comparison_normal_vs_drifted = compare_classifiers(scores, drifted_scores, label1='Normal', label2='Drifted')
+    comparison_normal_vs_drifted.to_csv(os.path.join(output_folder, "comparison_normal_vs_drifted.csv"), index=False)
+    print("Comparison (Normal vs Drifted):\n", comparison_normal_vs_drifted)
+
+    # Compare Normal Data vs BERT Features
+    comparison_normal_vs_bert = compare_classifiers(scores, bert_scores, label1='Normal', label2='BERT')
+    comparison_normal_vs_bert.to_csv(os.path.join(output_folder, "comparison_normal_vs_bert.csv"), index=False)
+    print("Comparison (Normal vs BERT):\n", comparison_normal_vs_bert)
+
+    # Compare Drifted Data vs BERT Features
+    comparison_drifted_vs_bert = compare_classifiers(drifted_scores, bert_drifted_scores, label1='Drifted', label2='BERT')
+    comparison_drifted_vs_bert.to_csv(os.path.join(output_folder, "comparison_drifted_vs_bert.csv"), index=False)
+    print("Comparison (Drifted vs BERT):\n", comparison_drifted_vs_bert)
+
+    # Compare Normal Data vs Drifted Data using BERT
+    comparison_bert_normal_vs_drifted = compare_classifiers(bert_scores, bert_drifted_scores, label1='BERT Normal', label2='BERT Drifted')
+    comparison_bert_normal_vs_drifted.to_csv(os.path.join(output_folder, "comparison_bert_normal_vs_drifted.csv"), index=False)
+    print("Comparison (BERT Normal vs Drifted):\n", comparison_bert_normal_vs_drifted)
 
 
 if __name__ == "__main__":
