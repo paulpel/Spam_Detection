@@ -10,7 +10,7 @@ This project aims to train and evaluate classifiers for detecting spam emails us
   - [Main Script](#main-script)
   - [Classifier Training and Evaluation](#classifier-training-and-evaluation)
   - [Data Preprocessing](#data-preprocessing)
-- [License](#license)
+  - [Statistical Tests](#statistical-tests)
 
 ## Installation
 
@@ -81,4 +81,13 @@ This script contains functions for preprocessing and tokenizing the data for bot
 - `bert_tokenize_dataset_processed(data)`: Tokenizes the processed dataset for BERT.
 - `prepare_data(data_path, drift_data_path)`: Prepares and tokenizes the Enron and processed datasets, and saves them as pickle files.
 - `bert_prepare_data(data_path, drift_data_path)`: Prepares and tokenizes the Enron and processed datasets for BERT, and saves them as pickle files.
+
+### Statistical Tests
+
+**file** `statistical_tests.py`
+
+This script contains functions for comparing the performance of different classifiers using statistical tests.
+
+**Functions:**
+- `compare_classifiers(scores1, scores2, metric='accuracy', label1='Set 1', label2='Set 2')`: Compares classifiers using paired t-tests on the specified metric.
 
