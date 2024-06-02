@@ -186,7 +186,7 @@ def train_classifiers_with_bert_features(data, features):
 
     # Initialize the classifiers
     classifiers = {
-        "Naive Bayes": MultinomialNB(),
+        "Naive Bayes": GaussianNB(),
         "KNN": KNeighborsClassifier(),
         "Random Forest": RandomForestClassifier(),
         "Gradient Boosting": GradientBoostingClassifier(),
