@@ -17,7 +17,7 @@ This project aims to train and evaluate classifiers for detecting spam emails us
 1. Clone the repository:
     ```bash
     git clone https://github.com/paulpel/Spam_Detection.git
-    cd enron-spam-detection
+    cd Spam_Detection
     ```
 
 2. Create a virtual environment and activate it:
@@ -42,6 +42,8 @@ To run the main script and train the classifiers:
 
 ```bash
 python main.py enron_spam_data.csv processed_data.csv /
+```
+
 ## Scripts Overview
 
 ### Main Script
