@@ -41,9 +41,9 @@ def train_classifiers(data):
     # Initialize the classifiers
     classifiers = {
         "Naive Bayes": GaussianNB(),
-        "KNN": KNeighborsClassifier(),
-        "Random Forest": RandomForestClassifier(),
-        "Gradient Boosting": GradientBoostingClassifier(),
+        # "KNN": KNeighborsClassifier(),
+        # "Random Forest": RandomForestClassifier(),
+        # "Gradient Boosting": GradientBoostingClassifier(),
     }
 
     trained_models = {}
@@ -51,8 +51,12 @@ def train_classifiers(data):
 
     # Train each classifier and evaluate
     for name, clf in classifiers.items():
-        clf.fit(X_train_vec, y_train)
-        y_pred = clf.predict(X_test_vec)
+        if name == "Naive Bayes":
+            clf.fit(X_train_vec.toarray(), y_train)
+            y_pred = clf.predict(X_test_vec.toarray())
+        else:
+            clf.fit(X_train_vec, y_train)
+            y_pred = clf.predict(X_test_vec)
         acc = accuracy_score(y_test, y_pred)
         report = classification_report(y_test, y_pred)
         trained_models[name] = clf
@@ -187,9 +191,9 @@ def train_classifiers_with_bert_features(data, features):
     # Initialize the classifiers
     classifiers = {
         "Naive Bayes": GaussianNB(),
-        "KNN": KNeighborsClassifier(),
-        "Random Forest": RandomForestClassifier(),
-        "Gradient Boosting": GradientBoostingClassifier(),
+        # "KNN": KNeighborsClassifier(),
+        # "Random Forest": RandomForestClassifier(),
+        # "Gradient Boosting": GradientBoostingClassifier(),
     }
 
     trained_models = {}
